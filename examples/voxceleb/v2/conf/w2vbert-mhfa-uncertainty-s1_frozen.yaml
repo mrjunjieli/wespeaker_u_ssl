@@ -1,0 +1,88 @@
+exp_dir: exp/w2vbert-mhfa-uncertainty-s1_frozen
+num_epochs: 30
+save_epoch_interval: 1
+log_batch_interval: 100
+seed: 716
+model: GaussianDiag
+model_args:
+  feat_dim: 1024
+  layer_num: 25
+  head_num: 64
+  compression_dim: 128
+  embed_dim: 256
+  pooling_head_chunk_size: 8
+  pooling_checkpoint: true
+model_init: null
+covariance_projection: true
+do_lm: false
+num_avg: 4
+enable_amp: true
+sync_bn: true
+frontend_lr_ratio: 1.0
+dataset_args:
+  frontend: w2vbert
+  w2vbert_args:
+    model_name: assets/w2v-bert-2.0
+    frozen: true
+    use_lora: false
+    use_bnb: false
+    layerdrop: 0.0
+    gradient_checkpointing: false
+    frame_shift: 20
+    frame_length: 20
+    max_input_samples: 160000
+  resample_rate: 16000
+  num_frms: 150
+  frame_shift: 10
+  frame_length: 25
+  speed_perturb: false
+  speed_perturb_mode: expanded
+  aug_prob: 0.6
+  shuffle: true
+  shuffle_args:
+    shuffle_size: 2500
+  filter: true
+  filter_args:
+    min_num_frames: 50
+    max_num_frames: 400
+  fbank_args:
+    num_mel_bins: 80
+    frame_shift: 10
+    frame_length: 25
+    dither: 1.0
+  cmvn: false
+  spec_aug: false
+  spec_aug_args:
+    num_t_mask: 2
+    num_f_mask: 2
+    max_t: 10
+    max_f: 8
+dataloader_args:
+  batch_size: 256
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+  drop_last: true
+projection_args:
+  project_type: arc_margin_intertopk_subcenter_uncertainty
+  scale: 32.0
+  easy_margin: false
+loss: CrossEntropyLoss
+loss_args: {}
+optimizer: AdamW
+optimizer_args:
+  weight_decay: 1.0e-07
+scheduler: ExponentialDecrease
+scheduler_args:
+  initial_lr: 0.0007
+  final_lr: 1.0e-05
+  warm_up_epoch: 4
+  warm_from_zero: true
+margin_scheduler: MarginScheduler
+margin_update:
+  initial_margin: 0.0
+  final_margin: 0.2
+  increase_start_epoch: 6
+  fix_start_epoch: 20
+  update_margin: true
+  increase_type: exp
